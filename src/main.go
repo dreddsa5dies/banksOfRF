@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/LindsayBradford/go-dbf/godbf"
@@ -26,7 +27,7 @@ func main() {
 func getDataForm() {
 	// запрос по url
 	resp, err := http.Get(url)
-	log.Printf("Загружается страница:	%v", url)
+	fmt.Printf("Загружается страница: %v\n", url)
 	if err != nil {
 		log.Fatalf("Ошибка загрузки %v", err)
 	}
@@ -45,20 +46,22 @@ func getDataForm() {
 	} else {
 		strMounth = strconv.Itoa(int(mounth))
 	}
+	fmt.Println("Поиск данных за: ", `01.`+strMounth+"."+strconv.Itoa(year))
 
 	// ищу ссылочки на формы
 	var urls []string
-	log.Println(`forms\/1\d\d-` + strconv.Itoa(year) + strMounth + `01.rar`)
 	// совпадения на все формы по текущему месяцу
-	regLLink, _ := regexp.Compile(`forms\/1\d\d-` + strconv.Itoa(year) + strMounth + "01.rar")
-
+	regLLink, _ := regexp.Compile(`forms\/1\d\d-` + strconv.Itoa(year) + strMounth + `01.rar`)
 	for _, i := range x.Find("a").Attrs("href") {
 		if regLLink.MatchString(i) {
 			urls = append(urls, i)
 		}
 	}
-	fmt.Println(urls)
-
+	fmt.Printf("Найдены базы: %v\n", len(urls))
+	for _, i := range urls {
+		fmt.Printf("%v ", strings.TrimLeft(i, "forms/"))
+	}
+	fmt.Println()
 }
 
 // открытие и декодирование DBF
