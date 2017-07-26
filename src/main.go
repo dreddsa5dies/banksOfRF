@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -20,16 +22,22 @@ const (
 )
 
 func main() {
-	getDataForm()
+	err := getDataForm()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// успещное завершение
+	os.Exit(0)
 }
 
 // загрузка последних данных
-func getDataForm() {
+func getDataForm() error {
 	// запрос по url
 	resp, err := http.Get(url)
 	fmt.Printf("Загружается страница: %v\n", url)
 	if err != nil {
-		log.Fatalf("Ошибка загрузки %v", err)
+		return fmt.Errorf("Ошибка загрузки %v", err)
 	}
 	// отложенное закрытие коннекта
 	defer resp.Body.Close()
@@ -46,10 +54,12 @@ func getDataForm() {
 	} else {
 		strMounth = strconv.Itoa(int(mounth))
 	}
-	fmt.Println("Поиск данных за: ", `01.`+strMounth+"."+strconv.Itoa(year))
+	var dateSave = "01." + strMounth + "." + strconv.Itoa(year)
+	fmt.Println("Поиск данных за: ", dateSave)
 
 	// ищу ссылочки на формы
 	var urls []string
+
 	// совпадения на все формы по текущему месяцу
 	regLLink, _ := regexp.Compile(`forms\/1\d\d-` + strconv.Itoa(year) + strMounth + `01.rar`)
 	for _, i := range x.Find("a").Attrs("href") {
@@ -57,11 +67,52 @@ func getDataForm() {
 			urls = append(urls, i)
 		}
 	}
+
 	fmt.Printf("Найдены базы: %v\n", len(urls))
 	for _, i := range urls {
-		fmt.Printf("%v ", strings.TrimLeft(i, "forms/"))
+		fmt.Printf("%v ", i)
 	}
 	fmt.Println()
+
+	fmt.Printf("Создание папки для хранения: %v\n", dateSave)
+	err = os.Mkdir("./"+"01."+strMounth+"."+strconv.Itoa(year), 0775)
+	if err != nil {
+		// тут не возвращаю, т.к. может быть уже создана папка
+		log.Printf("Ошибка создания папки сохранения: %v", err)
+	}
+
+	fmt.Println("Скачивание баз...")
+	for _, i := range urls {
+		bodyForm, err := http.Get(urlDownload + i)
+		fmt.Printf("Загружается: %v\n", i)
+		if err != nil {
+			return fmt.Errorf("Ошибка загрузки одной из форм: %v", err)
+		}
+		defer bodyForm.Body.Close()
+
+		// запись ответа в переменную
+		form, err := ioutil.ReadAll(bodyForm.Body)
+		if err != nil {
+			return fmt.Errorf("Ошибка записи ответа в переменную: %v", err)
+		}
+
+		// создание файла для загрузки
+		fileName := strings.TrimLeft(i, "forms/")
+		name := "./" + dateSave + "/" + fileName
+		fSave, err := os.Create(name)
+		if err != nil {
+			return fmt.Errorf("Ошибка создания файла для загрузки: %v", err)
+		}
+		defer fSave.Close()
+
+		// сохранение
+		fmt.Printf("Сохрание в:	%v\n", name)
+		fSave.Write(form)
+		time.Sleep(5 * time.Second)
+	}
+	fmt.Println("Загрузка завершена")
+
+	return nil
 }
 
 // открытие и декодирование DBF
