@@ -152,15 +152,85 @@ func dbfToXLSX(dbfDir, files string) error {
 		return fmt.Errorf("Ошибка добавления страницы %v", err)
 	}
 
-	// обход по всей таблице
-	for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
-		// добавление строки в XLS
-		row = sheet.AddRow()
-		for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
-			// добавление значения в ячейку
-			row.AddCell().SetString(dbfTable.FieldValue(i, y))
+	switch {
+	// 3. По форме 101
+	case strings.Contains(files, "B1.DBF"):
+		// обход по всей таблице
+		for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
+			// добавление строки в XLS
+			row = sheet.AddRow()
+			for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
+				// в третьей графе изменения счетов
+				if y != 2 {
+					// добавление значения в ячейку
+					row.AddCell().SetString(dbfTable.FieldValue(i, y))
+				} else {
+					switch {
+					case strings.Compare(dbfTable.FieldValue(i, y), "405") == 0:
+						row.AddCell().SetString("40502")
+					case strings.Compare(dbfTable.FieldValue(i, y), "406") == 0:
+						row.AddCell().SetString("40602")
+					case strings.Compare(dbfTable.FieldValue(i, y), "407") == 0:
+						row.AddCell().SetString("40702")
+					case strings.Compare(dbfTable.FieldValue(i, y), "408.1") == 0:
+						row.AddCell().SetString("40817")
+					case strings.Compare(dbfTable.FieldValue(i, y), "408.2") == 0:
+						row.AddCell().SetString("40820")
+					default:
+						row.AddCell().SetString(dbfTable.FieldValue(i, y))
+					}
+				}
+			}
+		}
+	// 4. По форме 102
+	case strings.Contains(files, "_P1.DBF"):
+		// обход по всей таблице
+		for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
+			// добавление строки в XLS
+			row = sheet.AddRow()
+			for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
+				// добавление значения в ячейку
+				row.AddCell().SetString(dbfTable.FieldValue(i, y))
+			}
+		}
+	// 5. По форме 123
+	case strings.Contains(files, "123D.DBF"):
+		// обход по всей таблице
+		for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
+			// добавление строки в XLS
+			row = sheet.AddRow()
+			for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
+				// добавление значения в ячейку
+				row.AddCell().SetString(dbfTable.FieldValue(i, y))
+			}
+			// добавление даты
+			row.AddCell().SetString(dateSave)
+		}
+	// 6. По форме 135
+	case strings.Contains(files, "_135_3.dbf"):
+		// обход по всей таблице
+		for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
+			// добавление строки в XLS
+			row = sheet.AddRow()
+			for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
+				// добавление значения в ячейку
+				row.AddCell().SetString(dbfTable.FieldValue(i, y))
+			}
+			// добавление даты
+			row.AddCell().SetString(dateSave)
+		}
+	case strings.Contains(files, "_135_4.dbf"):
+		// обход по всей таблице
+		for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
+			// добавление строки в XLS
+			row = sheet.AddRow()
+			for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
+				// добавление значения в ячейку
+				row.AddCell().SetString(dbfTable.FieldValue(i, y))
+			}
 		}
 	}
+
 	// сохранение
 	err = file.Save("./" + dateSave + "/" + strings.TrimRight(files, ".DBF") + ".xlsx")
 	if err != nil {
