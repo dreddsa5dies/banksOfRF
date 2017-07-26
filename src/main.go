@@ -26,6 +26,7 @@ const (
 
 var (
 	dateSave, formName string
+	delimiter          = strings.Repeat("=", 25)
 )
 
 // определение даты последнего обновления
@@ -49,7 +50,7 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 
-	// err := unrarForms()
+	// err = unrarForms()
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
@@ -65,6 +66,7 @@ func main() {
 
 // открытие и декодирование DBF в exel
 func readDBF() error {
+	fmt.Println(delimiter)
 	// открываем директорию
 	fmt.Printf("Чтение DBF: %v\n", dateSave)
 
@@ -142,11 +144,15 @@ func readDBF() error {
 		}
 	}
 
+	fmt.Println("Чтение DBF готово")
+	fmt.Println(delimiter)
+
 	return nil
 }
 
 // разархивирование все форм
 func unrarForms() error {
+	fmt.Println(delimiter)
 	// открываем директорию
 	fmt.Printf("Разархивирование: %v\n", dateSave)
 	dh, err := os.Open("./" + dateSave)
@@ -189,11 +195,15 @@ func unrarForms() error {
 		}
 	}
 
+	fmt.Println("Разархивирование готово")
+	fmt.Println(delimiter)
+
 	return nil
 }
 
 // загрузка последних данных
 func getDataForm() error {
+	fmt.Println(delimiter)
 	// запрос по url
 	resp, err := http.Get(url)
 	fmt.Printf("Загружается страница: %v\n", url)
@@ -262,6 +272,7 @@ func getDataForm() error {
 		time.Sleep(5 * time.Second)
 	}
 	fmt.Println("Загрузка завершена")
+	fmt.Println(delimiter)
 
 	return nil
 }
