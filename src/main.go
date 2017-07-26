@@ -45,17 +45,17 @@ func init() {
 }
 
 func main() {
-	// err := getDataForm()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	err := getDataForm()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// err := unrarForms()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	err = unrarForms()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	err := readDBF()
+	err = readDBF()
 	if err != nil {
 		log.Fatal(err)
 	}
