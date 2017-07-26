@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/LindsayBradford/go-dbf/godbf"
+	unarr "github.com/gen2brain/go-unarr"
 	"github.com/opesun/goquery"
 )
 
@@ -41,13 +43,65 @@ func init() {
 }
 
 func main() {
-	err := getDataForm()
+	// err := getDataForm()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	err := unrarForms()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// успещное завершение
+	// успешное завершение
 	os.Exit(0)
+}
+
+// разархивирование все форм
+func unrarForms() error {
+	// открываем директорию
+	fmt.Printf("Разархивирование: %v\n", dateSave)
+	dh, err := os.Open("./" + dateSave)
+	if err != nil {
+		return fmt.Errorf("Ошибка открытия папки с архивами: %v", err)
+	}
+	defer dh.Close()
+
+	// считывание списка файлов
+	for {
+		fis, err := dh.Readdir(10)
+		if err == io.EOF {
+			break
+		}
+		// обход всех файлов
+		for _, fi := range fis {
+			// если это архив
+			if strings.Contains(fi.Name(), ".rar") {
+				fmt.Printf("Открытие архива: %v\n", fi.Name())
+				a, err := unarr.NewArchive("./" + dateSave + "/" + fi.Name())
+				if err != nil {
+					return fmt.Errorf("Ошибка открытия архива: %v", err)
+				}
+				defer a.Close()
+
+				// куда сохранить
+				saveRarForms := "./" + dateSave + "/" + strings.TrimRight(fi.Name(), ".rar")
+				fmt.Printf("Создание папки для хранения: %v\n", strings.TrimRight(fi.Name(), ".rar"))
+				err = os.Mkdir(saveRarForms, 0775)
+				if err != nil {
+					// тут не возвращаю, т.к. может быть уже создана папка
+					log.Printf("Ошибка создания папки сохранения: %v", err)
+				}
+				// и сохраняю все
+				err = a.Extract(saveRarForms)
+				if err != nil {
+					return fmt.Errorf("Ошибка разархивирования: %v", err)
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 // загрузка последних данных
