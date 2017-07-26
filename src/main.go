@@ -21,6 +21,25 @@ const (
 	urlDownload = `http://cbr.ru/credit/`
 )
 
+var (
+	dateSave, formName string
+)
+
+// определение даты последнего обновления
+func init() {
+	// какая дата сейчас
+	dateNow := time.Now()
+	year, mounth, _ := dateNow.Date()
+	var strMounth string
+	if int(mounth) < 10 {
+		strMounth = "0" + strconv.Itoa(int(mounth))
+	} else {
+		strMounth = strconv.Itoa(int(mounth))
+	}
+	dateSave = "01." + strMounth + "." + strconv.Itoa(year)
+	formName = strconv.Itoa(year) + strMounth + `01.rar`
+}
+
 func main() {
 	err := getDataForm()
 	if err != nil {
@@ -45,23 +64,13 @@ func getDataForm() error {
 	// парсинг ответа
 	x, err := goquery.Parse(resp.Body)
 
-	// какая дата сейчас
-	dateNow := time.Now()
-	year, mounth, _ := dateNow.Date()
-	var strMounth string
-	if int(mounth) < 10 {
-		strMounth = "0" + strconv.Itoa(int(mounth))
-	} else {
-		strMounth = strconv.Itoa(int(mounth))
-	}
-	var dateSave = "01." + strMounth + "." + strconv.Itoa(year)
 	fmt.Println("Поиск данных за: ", dateSave)
 
 	// ищу ссылочки на формы
 	var urls []string
 
 	// совпадения на все формы по текущему месяцу
-	regLLink, _ := regexp.Compile(`forms\/1\d\d-` + strconv.Itoa(year) + strMounth + `01.rar`)
+	regLLink, _ := regexp.Compile(`forms\/1\d\d-` + formName)
 	for _, i := range x.Find("a").Attrs("href") {
 		if regLLink.MatchString(i) {
 			urls = append(urls, i)
@@ -75,7 +84,7 @@ func getDataForm() error {
 	fmt.Println()
 
 	fmt.Printf("Создание папки для хранения: %v\n", dateSave)
-	err = os.Mkdir("./"+"01."+strMounth+"."+strconv.Itoa(year), 0775)
+	err = os.Mkdir("./"+dateSave, 0775)
 	if err != nil {
 		// тут не возвращаю, т.к. может быть уже создана папка
 		log.Printf("Ошибка создания папки сохранения: %v", err)
