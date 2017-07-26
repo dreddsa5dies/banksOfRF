@@ -48,13 +48,75 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 
-	err := unrarForms()
+	// err := unrarForms()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	err := readDBF()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// успешное завершение
 	os.Exit(0)
+}
+
+// открытие и декодирование DBF в exel
+func readDBF() error {
+	// открываем директорию
+	fmt.Printf("Чтение DBF: %v\n", dateSave)
+
+	dh, err := os.Open("./" + dateSave)
+	if err != nil {
+		return fmt.Errorf("Ошибка открытия папки с архивами: %v", err)
+	}
+	defer dh.Close()
+
+	// считывание списка файлов
+	for {
+		fis, err := dh.Readdir(10)
+		if err == io.EOF {
+			break
+		}
+		// обход всех файлов
+		for _, fi := range fis {
+			if fi.IsDir() {
+				dbfDir, err := os.Open("./" + dateSave + "/" + fi.Name())
+				if err != nil {
+					return fmt.Errorf("Ошибка открытия папки с архивами: %v", err)
+				}
+				defer dbfDir.Close()
+				fmt.Printf("Чтение: %v\n", dbfDir.Name())
+				for {
+					f, err := dbfDir.Readdir(10)
+					if err == io.EOF {
+						break
+					}
+					// обход всех файлов
+					for _, files := range f {
+						fmt.Printf("Обработка %v\n", files.Name())
+						// NOT WORK: csKOI8R windows-1251 windows-1250
+						// WORK - DOS 866 - Russian OEM
+						dbfTable, err := godbf.NewFromFile(dbfDir.Name()+"/"+files.Name(), "866")
+						if err != nil {
+							return fmt.Errorf("Ошибка открытия DBF: %v", err)
+						}
+
+						// обход по всей таблице
+						for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
+							for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
+								fmt.Printf("%v", dbfTable.FieldValue(i, y))
+							}
+							fmt.Println()
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 // разархивирование все форм
@@ -176,24 +238,4 @@ func getDataForm() error {
 	fmt.Println("Загрузка завершена")
 
 	return nil
-}
-
-// открытие и декодирование DBF
-func readDBF() {
-	// NOT WORK
-	// csKOI8R windows-1251 windows-1250
-	// WORK - DOS 866 - Russian OEM
-	dbfTable, err := godbf.NewFromFile("./101-20170701/NAMES.DBF", "866")
-	if err != nil {
-		log.Fatalf("Ошибка открытия %v", err)
-	}
-
-	fmt.Printf("%v\n", len(dbfTable.FieldNames()))
-
-	for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
-		for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
-			fmt.Printf("%v;", dbfTable.FieldValue(i, y))
-		}
-		fmt.Println()
-	}
 }
