@@ -26,7 +26,7 @@ const (
 
 var (
 	dateSave, formName string
-	delimiter          = strings.Repeat("=", 25)
+	delimiter          = strings.Repeat("=", 40)
 )
 
 // определение даты последнего обновления
@@ -50,7 +50,7 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 
-	// err = unrarForms()
+	// err := unrarForms()
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
@@ -98,46 +98,22 @@ func readDBF() error {
 					}
 					// обход всех файлов
 					for _, files := range f {
-						fmt.Printf("Обработка %v\n", files.Name())
-						// NOT WORK: csKOI8R windows-1251 windows-1250
-						// WORK - DOS 866 - Russian OEM
-						dbfTable, err := godbf.NewFromFile(dbfDir.Name()+"/"+files.Name(), "866")
-						if err != nil {
-							return fmt.Errorf("Ошибка открытия DBF: %v", err)
+						switch {
+						// 3. По форме 101
+						case strings.Contains(files.Name(), "B1.DBF"):
+							dbfToXLSX(dbfDir.Name(), files.Name())
+						// 4. По форме 102
+						case strings.Contains(files.Name(), "_P1.DBF"):
+							dbfToXLSX(dbfDir.Name(), files.Name())
+						// 5. По форме 123
+						case strings.Contains(files.Name(), "123D.DBF"):
+							dbfToXLSX(dbfDir.Name(), files.Name())
+						// 6. По форме 135
+						case strings.Contains(files.Name(), "_135_3.dbf"):
+							dbfToXLSX(dbfDir.Name(), files.Name())
+						case strings.Contains(files.Name(), "_135_4.dbf"):
+							dbfToXLSX(dbfDir.Name(), files.Name())
 						}
-
-						// переменные для сохранения в XLSX
-						// файл
-						var file *xlsx.File
-						// страница
-						var sheet *xlsx.Sheet
-						// строка
-						var row *xlsx.Row
-
-						// создаем новый файл
-						file = xlsx.NewFile()
-						// добавляем страницу
-						sheet, err = file.AddSheet("Sheet")
-						if err != nil {
-							return fmt.Errorf("Ошибка добавления страницы %v", err)
-						}
-
-						// обход по всей таблице
-						for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
-							// добавление строки в XLS
-							row = sheet.AddRow()
-							for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
-								// добавление значения в ячейку
-								row.AddCell().SetString(dbfTable.FieldValue(i, y))
-							}
-						}
-						// сохранение
-						err = file.Save(dbfDir.Name() + "/" + strings.TrimRight(files.Name(), ".DBF") + ".xlsx")
-						if err != nil {
-							return fmt.Errorf("Ошибка сохранения файла %v", err)
-						}
-						fmt.Printf("Сохранение в %v\n", dbfDir.Name()+"/"+strings.TrimRight(files.Name(), ".DBF")+".xlsx")
-						time.Sleep(5 * time.Second)
 					}
 				}
 			}
@@ -146,6 +122,53 @@ func readDBF() error {
 
 	fmt.Println("Чтение DBF готово")
 	fmt.Println(delimiter)
+
+	return nil
+}
+
+// DBF to XLS
+func dbfToXLSX(dbfDir, files string) error {
+	fmt.Printf("Обработка %v\n", files)
+	// NOT WORK: csKOI8R windows-1251 windows-1250
+	// WORK - DOS 866 - Russian OEM
+	dbfTable, err := godbf.NewFromFile(dbfDir+"/"+files, "866")
+	if err != nil {
+		return fmt.Errorf("Ошибка открытия DBF: %v", err)
+	}
+
+	// переменные для сохранения в XLSX
+	// файл
+	var file *xlsx.File
+	// страница
+	var sheet *xlsx.Sheet
+	// строка
+	var row *xlsx.Row
+
+	// создаем новый файл
+	file = xlsx.NewFile()
+	// добавляем страницу
+	sheet, err = file.AddSheet("Sheet")
+	if err != nil {
+		return fmt.Errorf("Ошибка добавления страницы %v", err)
+	}
+
+	// обход по всей таблице
+	for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
+		// добавление строки в XLS
+		row = sheet.AddRow()
+		for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
+			// добавление значения в ячейку
+			row.AddCell().SetString(dbfTable.FieldValue(i, y))
+		}
+	}
+	// сохранение
+	err = file.Save("./" + dateSave + "/" + strings.TrimRight(files, ".DBF") + ".xlsx")
+	if err != nil {
+		return fmt.Errorf("Ошибка сохранения файла %v", err)
+	}
+	// сохраню лучше в корень с архивами
+	fmt.Printf("Сохранение в %v\n", "./"+dateSave+"/"+strings.TrimRight(files, ".DBF")+".xlsx")
+	time.Sleep(5 * time.Second)
 
 	return nil
 }
