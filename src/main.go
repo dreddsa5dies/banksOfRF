@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/LindsayBradford/go-dbf/godbf"
-	unarr "github.com/gen2brain/go-unarr"
+	"github.com/mholt/archiver"
 	"github.com/opesun/goquery"
 	"github.com/tealeg/xlsx"
 )
@@ -45,20 +45,20 @@ func init() {
 }
 
 func main() {
-	err := getDataForm()
+	// err := getDataForm()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	err := unrarForms()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = unrarForms()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = readDBF()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err = readDBF()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// успешное завершение
 	os.Exit(0)
@@ -265,11 +265,6 @@ func unrarForms() error {
 			// если это архив
 			if strings.Contains(fi.Name(), ".rar") {
 				fmt.Printf("Открытие архива: %v\n", fi.Name())
-				a, err := unarr.NewArchive("./" + dateSave + "/" + fi.Name())
-				if err != nil {
-					return fmt.Errorf("Ошибка открытия архива: %v", err)
-				}
-				defer a.Close()
 
 				// куда сохранить
 				saveRarForms := "./" + dateSave + "/" + strings.TrimRight(fi.Name(), ".rar")
@@ -280,7 +275,7 @@ func unrarForms() error {
 					log.Printf("Ошибка создания папки сохранения: %v", err)
 				}
 				// и сохраняю все
-				err = a.Extract(saveRarForms)
+				err := archiver.Rar.Open("./"+dateSave+"/"+fi.Name(), saveRarForms)
 				if err != nil {
 					return fmt.Errorf("Ошибка разархивирования: %v", err)
 				}
