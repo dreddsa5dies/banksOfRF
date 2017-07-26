@@ -15,6 +15,7 @@ import (
 	"github.com/LindsayBradford/go-dbf/godbf"
 	unarr "github.com/gen2brain/go-unarr"
 	"github.com/opesun/goquery"
+	"github.com/tealeg/xlsx"
 )
 
 const (
@@ -103,13 +104,38 @@ func readDBF() error {
 							return fmt.Errorf("Ошибка открытия DBF: %v", err)
 						}
 
+						// переменные для сохранения в XLSX
+						// файл
+						var file *xlsx.File
+						// страница
+						var sheet *xlsx.Sheet
+						// строка
+						var row *xlsx.Row
+
+						// создаем новый файл
+						file = xlsx.NewFile()
+						// добавляем страницу
+						sheet, err = file.AddSheet("Sheet")
+						if err != nil {
+							return fmt.Errorf("Ошибка добавления страницы %v", err)
+						}
+
 						// обход по всей таблице
 						for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
+							// добавление строки в XLS
+							row = sheet.AddRow()
 							for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
-								fmt.Printf("%v", dbfTable.FieldValue(i, y))
+								// добавление значения в ячейку
+								row.AddCell().SetString(dbfTable.FieldValue(i, y))
 							}
-							fmt.Println()
 						}
+						// сохранение
+						err = file.Save(dbfDir.Name() + "/" + strings.TrimRight(files.Name(), ".DBF") + ".xlsx")
+						if err != nil {
+							return fmt.Errorf("Ошибка сохранения файла %v", err)
+						}
+						fmt.Printf("Сохранение в %v\n", dbfDir.Name()+"/"+strings.TrimRight(files.Name(), ".DBF")+".xlsx")
+						time.Sleep(5 * time.Second)
 					}
 				}
 			}
