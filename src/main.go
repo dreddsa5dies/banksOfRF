@@ -45,26 +45,26 @@ func init() {
 }
 
 func main() {
-	// err := getDataForm()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	err := unrarForms()
+	err := getDataForm()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// err = readDBF()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	err = unrarForms()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = readDBF()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// успешное завершение
 	os.Exit(0)
 }
 
-// открытие и декодирование DBF в exel
+// открытие и декодирование DBF в excel
 func readDBF() error {
 	fmt.Println(delimiter)
 	// открываем директорию
