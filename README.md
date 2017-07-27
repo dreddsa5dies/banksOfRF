@@ -1,18 +1,13 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/dreddsa5dies/banksOfRF)](https://goreportcard.com/report/github.com/dreddsa5dies/banksOfRF) [![GORef](https://godoc.org/github.com/dreddsa5dies/banksOfRF?status.svg)](https://godoc.org/github.com/dreddsa5dies/banksOfRF) ![License](https://img.shields.io/aur/license/yaourt.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/dreddsa5dies/banksOfRF)](https://goreportcard.com/report/github.com/dreddsa5dies/banksOfRF) ![License](https://img.shields.io/aur/license/yaourt.svg)
 
 ![IMAGE](img/banksOfRF.png)
 
 ### Утилита для группы [БанкиРФ](https://vk.com/banki_r_f)
 
-## TODO
-* Скачивание актуальных баз
-* Форматирование в exel
-* Редактирование данных
-
 ## Установка
 1. Загрузите [последнюю версию](https://github.com/dreddsa5dies/banksOfRF/releases/)
 2. Поместите исполняемые файлы в папку `bin`, которая входит в Ваш PATH
-3. Запустите banks.exe
+3. Запустите нужный исполняемый файл
 
 ## Лицензия
 Проект под лицензией GPL. Прочитайте LICENSE файл.
