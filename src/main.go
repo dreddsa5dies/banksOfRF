@@ -45,17 +45,17 @@ func init() {
 }
 
 func main() {
-	err := getDataForm()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err := getDataForm()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	err = unrarForms()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err = unrarForms()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	err = readDBF()
+	err := readDBF()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -153,8 +153,14 @@ func dbfToXLSX(dbfDir, files string) error {
 	}
 
 	switch {
+
 	// 3. По форме 101
 	case strings.Contains(files, "B1.DBF"):
+		// шапка таблицы
+		row = sheet.AddRow()
+		for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
+			row.AddCell().SetString(dbfTable.FieldNames()[y])
+		}
 		// обход по всей таблице
 		for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
 			// добавление строки в XLS
@@ -182,8 +188,14 @@ func dbfToXLSX(dbfDir, files string) error {
 				}
 			}
 		}
+
 	// 4. По форме 102
 	case strings.Contains(files, "_P1.DBF"):
+		// шапка таблицы
+		row = sheet.AddRow()
+		for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
+			row.AddCell().SetString(dbfTable.FieldNames()[y])
+		}
 		// обход по всей таблице
 		for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
 			// добавление строки в XLS
@@ -193,8 +205,14 @@ func dbfToXLSX(dbfDir, files string) error {
 				row.AddCell().SetString(dbfTable.FieldValue(i, y))
 			}
 		}
+
 	// 5. По форме 123
 	case strings.Contains(files, "123D.DBF"):
+		// шапка таблицы
+		row = sheet.AddRow()
+		for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
+			row.AddCell().SetString(dbfTable.FieldNames()[y])
+		}
 		// обход по всей таблице
 		for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
 			// добавление строки в XLS
@@ -206,8 +224,14 @@ func dbfToXLSX(dbfDir, files string) error {
 			// добавление даты
 			row.AddCell().SetString(dateSave)
 		}
+
 	// 6. По форме 135
 	case strings.Contains(files, "_135_3.dbf"):
+		// шапка таблицы
+		row = sheet.AddRow()
+		for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
+			row.AddCell().SetString(dbfTable.FieldNames()[y])
+		}
 		// обход по всей таблице
 		for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
 			// добавление строки в XLS
@@ -219,7 +243,13 @@ func dbfToXLSX(dbfDir, files string) error {
 			// добавление даты
 			row.AddCell().SetString(dateSave)
 		}
+
 	case strings.Contains(files, "_135_4.dbf"):
+		// шапка таблицы
+		row = sheet.AddRow()
+		for y := 0; y <= len(dbfTable.FieldNames())-1; y++ {
+			row.AddCell().SetString(dbfTable.FieldNames()[y])
+		}
 		// обход по всей таблице
 		for i := 0; i <= dbfTable.NumberOfRecords()-1; i++ {
 			// добавление строки в XLS
